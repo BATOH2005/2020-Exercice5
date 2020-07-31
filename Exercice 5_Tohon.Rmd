@@ -4,7 +4,10 @@ author: "Tohon Aurelas"
 date: "31/07/2020"
 output: html_document
 ---
-#Création d'une série temporelle du CO2 à partir des données de hawai.csv
+
+# Création d'une série temporelle du CO2 à partir des données de hawai.csv
+***
+
 ```{r, ts-load-data}
 library("tidyverse")
 hawai <- read_csv("data/hawai.csv")
@@ -20,9 +23,11 @@ autoplot(hawai_ts)
                 
 ```
 
-#2. séparation de la série en parties d'entraînement (environ 70% des données) et en partie test
+# 2. séparation de la série en parties d'entraînement (environ 70% des données) et en partie test
+***
+
 Nous allons prendre 70% des données. Cela correstpond à la période de 1958 à 1988
-Ici la serie qui sera en partie d'entrainement est hawai70_ts et la serie hawai30_ts en partie test 
+Ici, la serie qui sera en partie d'entrainement est hawai_ts_train et la serie hawai_ts_test en partie test 
                 
 ```{r}
 hawai70_ts <- hawai_ts[, 1]
@@ -31,7 +36,10 @@ hawai_ts_test <- window(hawai_ts, start = 1989.000)
                 
 ```
 
-#3. création d'un modèle prévisionnel sur les données d'entraînement, puis projection de la prévision de CO2 atmosphérique pour comparer aux données test
+
+# 3. création d'un modèle prévisionnel sur les données d'entraînement, puis projection de la prévision de CO2 atmosphérique pour comparer aux données test
+***
+
 ```{r}
 hm_naive <- snaive(hawai_ts_train, h = 24)
 autoplot(hm_naive) +
@@ -39,19 +47,22 @@ autoplot(hm_naive) +
   autolayer(hawai_ts_test, color = rgb(0, 0, 0, 0.6)) +
   labs(x = "Time", y = "CO2")
 ```
+Le graphique ci-dessus r?v?le que la pr?vision na?ve (repr?sent?e en rose) correspond bien ? la valeur observ?e au cycle pr?c?dent (repr?sent?e en noir). Les donn?es de test apparaissent sur le graphique en couleur gris transparent.
+ 
+# 4. Analyse des résidus 
+***
 
-#4. Analyse des résidus 
 ```{r}
 checkresiduals(hm_naive)
 ```
+***
 
+La p-value étant inférieure à 2.2e-16, il apparait ainsi tres peu probable que les résidus forment un bruit blanc. Les résidus contiennent donc de l'autocorrélation. Le graphique de la distribution des résidus montre quelques valeurs aberrantes, ainsi qu'une distribution plutôt pointue (un test de Kurtosis serait probablement élevé) étalée vers la droite.
 
+# 5. commentaire de la fiabilité du modele. Proposition d'amélioration
 
-
-
-#5. commentaire du modèle est-il fiable? Comment pourrait-il être amélioré?
-
-
-
-
-
+```{r}
+accuracy(hm_naive, hawai_ts)
+```
+***
+Nos resultats indiquent qu'il existerait une structure dans les r?sidus. En consequence, un meilleur modele permettrait de le voir plus clairement.

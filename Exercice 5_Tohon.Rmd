@@ -1,0 +1,57 @@
+---
+title: "Exercice 5_Tohon aurelas"
+author: "Tohon Aurelas"
+date: "31/07/2020"
+output: html_document
+---
+#Création d'une série temporelle du CO2 à partir des données de hawai.csv
+```{r, ts-load-data}
+library("tidyverse")
+hawai <- read_csv("data/hawai.csv")
+View(hawai)
+library("forecast")
+library("fpp2")
+library(lubridate)
+library(zoo)
+hawai_ts <- ts(hawai %>% dplyr::select(-time),
+                    start = c(hawai$time[1] , 1),
+                    frequency = 12)
+autoplot(hawai_ts)
+                
+```
+
+#2. séparation de la série en parties d'entraînement (environ 70% des données) et en partie test
+Nous allons prendre 70% des données. Cela correstpond à la période de 1958 à 1988
+Ici la serie qui sera en partie d'entrainement est hawai70_ts et la serie hawai30_ts en partie test 
+                
+```{r}
+hawai70_ts <- hawai_ts[, 1]
+hawai_ts_train <- window(hawai_ts, start = 1958.167, end = 1988.999)
+hawai_ts_test <- window(hawai_ts, start = 1989.000)
+                
+```
+
+#3. création d'un modèle prévisionnel sur les données d'entraînement, puis projection de la prévision de CO2 atmosphérique pour comparer aux données test
+```{r}
+hm_naive <- snaive(hawai_ts_train, h = 24)
+autoplot(hm_naive) +
+  autolayer(fitted(hm_naive)) +
+  autolayer(hawai_ts_test, color = rgb(0, 0, 0, 0.6)) +
+  labs(x = "Time", y = "CO2")
+```
+
+#4. Analyse des résidus 
+```{r}
+checkresiduals(hm_naive)
+```
+
+
+
+
+
+#5. commentaire du modèle est-il fiable? Comment pourrait-il être amélioré?
+
+
+
+
+
